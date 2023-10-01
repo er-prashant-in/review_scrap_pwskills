@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
 import logging
 logging.basicConfig(filename="scrapper.log" , level=logging.INFO)
+import pymongo 
+import urllib.parse
 
 app = Flask(__name__)
 
@@ -72,6 +74,21 @@ def index():
                           "Comment": custComment}
                 reviews.append(mydict)
             logging.info("log my final result {}".format(reviews))
+
+            # Encode the username and password using urllib.parse.quote_plus
+            username = urllib.parse.quote_plus("er_prashant_in")
+            password = urllib.parse.quote_plus("2@Prashant@2001")
+
+            # Create the connection string with encoded username and password
+            connection_string = f"mongodb+srv://{username}:{password}@cluster0.afwjzau.mongodb.net/?retryWrites=true&w=majority"
+
+            # Create the MongoClient
+            client = pymongo.MongoClient(connection_string)
+            
+            db=client['review_scrap']
+            review_col=db['review_scrap_data']
+            review_col.insert_many(reviews)
+
             return render_template('result.html', reviews=reviews[0:(len(reviews)-1)])
         except Exception as e:
             logging.info(e)
